@@ -1,0 +1,150 @@
+---
+title: "assignment_04"
+author: "Adwait Kalsekar"
+date: "2023-10-07"
+output: html_document
+---
+
+```{r}
+# Loading Libraries
+library(fpp)
+library(fpp2)
+library(TTR)
+
+# Reading Data from CSV File
+df = read.csv("NJ_HPI.csv")
+str(df)
+
+# Converting DATE column to R Date Type
+df$DATE <- as.Date(df$DATE)
+str(df)
+df
+
+# Converting to Time Series data
+df_ts = ts(df$HPI.NJ, start=c(1975, 1), end=c(2023, 2), frequency=4)
+df_ts
+
+# Attributes and Structure
+attributes(df_ts)
+str(df_ts)
+
+# Plotting ACF
+Acf(df_ts)
+plot(df_ts)
+
+# Mean Forecast
+mean_forecast <- meanf(df_ts, 10)
+plot(mean_forecast)
+
+# Naive
+naive_forecast <- naive(df_ts, 10)
+plot(naive_forecast)
+
+# Random Walk
+rwf_forecast <- rwf(df_ts, 10)
+plot(rwf_forecast)
+
+# Random Walk with Drift
+rwf_forecast <- rwf(df_ts, 10, drift=TRUE)
+plot(rwf_forecast)
+
+# Seasonal Naive
+snaive_forecast <- snaive(df_ts, 10)
+plot(snaive_forecast)
+
+# Moving Averages
+MA5_forecast <- ma(df_ts,order=5)
+plot(MA5_forecast)
+MA9_forecast <- ma(df_ts,order=9)
+plot(MA9_forecast)
+
+# Visualising Moving Averages Separately
+plot(df_ts)
+lines(MA5_forecast,col="Pink")
+lines(MA9_forecast,col="Blue")
+
+# Comparing Various Visualisations 
+plot(mean_forecast)
+lines(naive_forecast$mean,col="red")
+lines(rwf_forecast$mean,col="green")
+lines(snaive_forecast$mean,col="blue")
+
+# Exponential Smoothing
+ets_model <- ets(df_ts)
+plot(ets_model)
+
+# HoltWinters
+HW <- HoltWinters(df_ts)
+plot(HW)
+
+SSE_Simple_1 <- HoltWinters(df_ts,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple_1)
+plot(SSE_Simple_1)
+SSE_Simple_1$SSE
+
+SSE_Simple_2 <- HoltWinters(df_ts,beta=FALSE,gamma=TRUE)
+attributes(SSE_Simple_2)
+plot(SSE_Simple_2)
+SSE_Simple_2$SSE
+
+SSE_Simple_3 <- HoltWinters(df_ts,beta=TRUE,gamma=FALSE)
+attributes(SSE_Simple_3)
+plot(SSE_Simple_3)
+SSE_Simple_3$SSE
+
+SSE_Simple_4 <- HoltWinters(df_ts,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple_4)
+plot(SSE_Simple_4)
+SSE_Simple_4$SSE
+
+# Forecast for ETS
+ets_forecast <- forecast(ets_model, h=10)
+plot(ets_forecast)
+
+HW_forecast <- forecast(HW, h=10)
+plot(HW_forecast)
+
+SSE_Simple_forecast_1 <- forecast(SSE_Simple_1, h=10)
+plot(SSE_Simple_forecast_1)
+
+SSE_Simple_forecast_2 <- forecast(SSE_Simple_2, h=10)
+plot(SSE_Simple_forecast_2)
+
+SSE_Simple_forecast_3 <- forecast(SSE_Simple_3, h=10)
+plot(SSE_Simple_forecast_3)
+
+SSE_Simple_forecast_4 <- forecast(SSE_Simple_4, h=10)
+plot(SSE_Simple_forecast_4)
+
+# Combining Forecasts
+plot(ets_forecast)
+lines(HW_forecast$mean, col="red")
+lines(SSE_Simple_forecast_1$mean, col="green")
+lines(SSE_Simple_forecast_2$mean, col="blue")
+lines(SSE_Simple_forecast_3$mean, col="yellow")
+lines(SSE_Simple_forecast_4$mean, col="orange")
+
+# Combining All Forecasts with the original Time Series
+plot(ets_forecast)
+lines(HW_forecast$mean, col="red")
+lines(SSE_Simple_forecast_1$mean, col="green")
+lines(SSE_Simple_forecast_2$mean, col="violet")
+lines(SSE_Simple_forecast_3$mean, col="purple")
+lines(SSE_Simple_forecast_4$mean, col="yellow")
+lines(mean_forecast$mean, col="pink")
+lines(naive_forecast$mean,col="plum")
+lines(rwf_forecast$mean,col="orange")
+lines(snaive_forecast$mean,col="blue")
+
+# Calculating Accuracy 
+accuracy(mean_forecast)
+accuracy(naive_forecast)
+accuracy(rwf_forecast)
+accuracy(snaive_forecast)
+accuracy(ets_forecast)
+accuracy(HW_forecast)
+accuracy(SSE_Simple_forecast_1)
+accuracy(SSE_Simple_forecast_2)
+accuracy(SSE_Simple_forecast_3)
+accuracy(SSE_Simple_forecast_4)
+```
